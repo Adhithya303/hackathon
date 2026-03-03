@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ShoppingCart, Leaf, Cpu, Zap, ArrowRight } from 'lucide-react';
+import { ShoppingCart, Leaf, Cpu, Zap, ArrowRight, ShieldAlert } from 'lucide-react';
 
 const agents = [
   {
@@ -50,12 +50,28 @@ const agents = [
     ],
     metric: { label: 'Match Ratio', value: '87%', sub: 'first-time invoice match' },
   },
+  {
+    id: 'risk',
+    name: 'Risk Detection & Compliance Agent',
+    icon: ShieldAlert,
+    color: 'amber',
+    glowClass: 'glass-glow-cyan',
+    badge: 'Guard',
+    capabilities: [
+      'Real-Time Risk Scanning — monitors 24,700+ signals across geopolitical, weather, and market feeds',
+      'Carrier Scorecard Engine — financial health, on-time %, claims ratio, safety audits aggregated live',
+      'Trade Compliance — auto-validates GST filings, e-way bills, customs docs, sanctions screening',
+      'Anomaly Detection — flags invoice mismatches, unusual rate spikes, and fraud patterns instantly',
+    ],
+    metric: { label: 'Signals Monitored', value: '24.7K+', sub: 'real-time feeds' },
+  },
 ];
 
 const colorMap = {
   cyan: { dot: 'bg-cyan', ring: 'ring-cyan/30', text: 'text-cyan', bg: 'bg-cyan-dim' },
   green: { dot: 'bg-green', ring: 'ring-green/30', text: 'text-green', bg: 'bg-green-dim' },
   purple: { dot: 'bg-purple', ring: 'ring-purple/30', text: 'text-purple', bg: 'bg-purple-dim' },
+  amber: { dot: 'bg-amber', ring: 'ring-amber/30', text: 'text-amber', bg: 'bg-amber-dim' },
 };
 
 export default function AgentMarketplace() {
@@ -80,12 +96,12 @@ export default function AgentMarketplace() {
             Agent <span className="gradient-text">Marketplace</span>
           </h2>
           <p className="text-text-secondary max-w-xl mx-auto">
-            Composable autonomous agents — deploy one or stack all three for full-spectrum freight intelligence.
+            Composable autonomous agents — deploy one or stack all four for full-spectrum freight intelligence.
           </p>
         </motion.div>
 
         {/* Cards Grid */}
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
           {agents.map((agent, idx) => {
             const c = colorMap[agent.color];
             const Icon = agent.icon;

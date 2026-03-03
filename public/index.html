@@ -760,10 +760,10 @@
                     Trusted by Onida, Saint Gobain, Perfetti Van Melle, Jyothy Labs, Apollo Tyres and more.
                 </p>
                 <div class="cta-actions">
-                    <a href="mailto:lorri@logisticsnow.in" class="btn btn-primary btn-xl">
+                    <button onclick="document.getElementById('demo-modal').classList.add('demo-modal-open')" class="btn btn-primary btn-xl">
                         <span class="btn-glow"></span>
-                        Schedule Meeting / Demo Now
-                    </a>
+                        Schedule Demo
+                    </button>
                     <a href="tel:+919867773508" class="btn btn-ghost btn-xl">Call +91-9867773508 →</a>
                 </div>
                 <div class="cta-trust">
@@ -780,6 +780,72 @@
             </div>
         </div>
     </section>
+
+    <!-- Demo Request Modal -->
+    <div class="demo-modal-overlay" id="demo-modal" onclick="if(event.target===this)this.classList.remove('demo-modal-open')">
+        <div class="demo-modal">
+            <button class="demo-modal-close" onclick="document.getElementById('demo-modal').classList.remove('demo-modal-open')" aria-label="Close">✕</button>
+            <div id="demo-form-view">
+                <div class="demo-modal-header">
+                    <div class="demo-modal-icon">📅</div>
+                    <div>
+                        <h3 class="demo-modal-title">Schedule a Demo</h3>
+                        <p class="demo-modal-sub">See LoRRI's autonomous agents in action on your data</p>
+                    </div>
+                </div>
+                <form id="demo-form" class="demo-form">
+                    <div class="demo-form-row">
+                        <div class="demo-form-field">
+                            <label>Full Name *</label>
+                            <input type="text" id="demo-name" placeholder="Rajesh Kumar" required>
+                        </div>
+                        <div class="demo-form-field">
+                            <label>Work Email *</label>
+                            <input type="email" id="demo-email" placeholder="rajesh@company.com" required>
+                        </div>
+                    </div>
+                    <div class="demo-form-row">
+                        <div class="demo-form-field">
+                            <label>Company *</label>
+                            <input type="text" id="demo-company" placeholder="Acme Logistics Pvt. Ltd." required>
+                        </div>
+                        <div class="demo-form-field">
+                            <label>Phone</label>
+                            <input type="tel" id="demo-phone" placeholder="+91 98765 43210">
+                        </div>
+                    </div>
+                    <div class="demo-form-field">
+                        <label>Annual Freight Spend</label>
+                        <select id="demo-spend">
+                            <option value="">Select range</option>
+                            <option value="<10cr">Less than ₹10 Cr</option>
+                            <option value="10-50cr">₹10 – 50 Cr</option>
+                            <option value="50-200cr">₹50 – 200 Cr</option>
+                            <option value="200-500cr">₹200 – 500 Cr</option>
+                            <option value="500cr+">₹500 Cr+</option>
+                        </select>
+                    </div>
+                    <div class="demo-form-field">
+                        <label>What would you like to see?</label>
+                        <textarea id="demo-message" rows="3" placeholder="E.g., procurement automation for our top 50 lanes, sustainability reporting..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-xl demo-submit-btn" style="width:100%">
+                        <span class="btn-glow"></span>
+                        Request Demo
+                    </button>
+                    <p class="demo-form-alt">
+                        Or email <a href="mailto:lorri@logisticsnow.in">lorri@logisticsnow.in</a> · Call <a href="tel:+919867773508">+91-9867773508</a>
+                    </p>
+                </form>
+            </div>
+            <div id="demo-success-view" style="display:none" class="demo-success">
+                <div class="demo-success-icon">✓</div>
+                <h3 class="demo-modal-title">Demo Requested!</h3>
+                <p class="demo-success-text">Thank you! Our team will reach out within 24 hours to schedule a personalized walkthrough.</p>
+                <button onclick="document.getElementById('demo-modal').classList.remove('demo-modal-open');document.getElementById('demo-form-view').style.display='';document.getElementById('demo-success-view').style.display='none';document.getElementById('demo-form').reset();" class="btn btn-ghost" style="margin-top:1rem;">Close</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Footer -->
     <footer class="footer">

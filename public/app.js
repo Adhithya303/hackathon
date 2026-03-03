@@ -1614,6 +1614,36 @@
     }
 
     // ============================================
+    // 16. DEMO REQUEST FORM HANDLER
+    // ============================================
+    class DemoFormHandler {
+        constructor() {
+            this.form = document.getElementById('demo-form');
+            if (!this.form) return;
+            this.form.addEventListener('submit', (e) => this.handleSubmit(e));
+        }
+
+        async handleSubmit(e) {
+            e.preventDefault();
+            const btn = this.form.querySelector('.demo-submit-btn');
+            const origText = btn.innerHTML;
+            btn.innerHTML = '<span style="display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.6s linear infinite;vertical-align:middle;margin-right:8px;"></span> Submitting…';
+            btn.disabled = true;
+
+            // Simulate API call
+            await new Promise(r => setTimeout(r, 1500));
+
+            // Show success
+            document.getElementById('demo-form-view').style.display = 'none';
+            document.getElementById('demo-success-view').style.display = '';
+
+            // Reset button
+            btn.innerHTML = origText;
+            btn.disabled = false;
+        }
+    }
+
+    // ============================================
     // INITIALIZE
     // ============================================
     document.addEventListener('DOMContentLoaded', () => {
@@ -1640,6 +1670,7 @@
         new LiveDashboard();
         new ROIApiEnhancer();
         new TraceStreamHandler();
+        new DemoFormHandler();
     });
 
 })();
