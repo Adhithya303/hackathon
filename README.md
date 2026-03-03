@@ -2,7 +2,7 @@
 
 > **AI-native SaaS platform that deploys autonomous agents to optimize freight procurement, sustainability, routing, and risk compliance — built for the ₹12.5 Lakh Crore Indian logistics market.**
 
-Built by **LogisticsNow** · [lorri.in](https://lorri.in)
+Built by **Team Alpha Hackers** (https://alpha-hackers.onrender.com/index.html)
 
 ---
 
