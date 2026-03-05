@@ -1,6 +1,8 @@
-// /api/agent/chat — Embedded AI Assistant
+// /api/agent/chat — AI-Powered Assistant with ML Intent Classification
 // POST { message: string, history?: Array<{role, content}> }
-// Returns AI assistant responses with context-aware logistics intelligence
+// Uses ML intent classifier to route queries, then pattern-matches for response
+
+const ML_BASE = process.env.ML_API_URL || 'http://localhost:8000';
 
 const SYSTEM_CONTEXT = `You are LoRRI, an autonomous freight intelligence assistant by LogisticsNow. 
 You help Indian logistics professionals understand freight rates, optimize supply chains, 
@@ -169,12 +171,71 @@ export async function POST(request) {
     return Response.json({ error: '"message" is required.' }, { status: 400 });
   }
 
-  // Simulate AI processing delay (longer for complex queries)
-  const complexity = message.length > 50 ? 600 : 300;
-  await new Promise(r => setTimeout(r, complexity + Math.random() * 400));
+  // Step 1: Classify intent using ML model
+  let mlIntent = null;
+  let mlConfidence = 0;
+  try {
+    const intentRes = await fetch(`${ML_BASE}/predict/intent`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: message }),
+    });
+    if (intentRes.ok) {
+      const intentData = await intentRes.json();
+      mlIntent = intentData.intent;
+      mlConfidence = intentData.confidence;
+    }
+  } catch {
+    // ML server unavailable — fall through to pattern matching
+  }
 
+  // Step 2: If ML detected a rate query, try to get a real ML prediction
+  let mlEnrichment = null;
+  if (mlIntent === 'rate_query') {
+    const cities = extractCities(message);
+    if (cities.origin && cities.destination) {
+      try {
+        const rateRes = await fetch(`${ML_BASE}/predict/rate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ origin: cities.origin, destination: cities.destination }),
+        });
+        if (rateRes.ok) {
+          const rateData = await rateRes.json();
+          mlEnrichment = {
+            message: `**🤖 ML Rate Prediction (Random Forest model)**\n\n| Parameter | Value |\n|-----------|-------|\n| Route | ${rateData.origin} → ${rateData.destination} |\n| Distance | ${rateData.distance_km} km |\n| Predicted Rate | ₹${Math.round(rateData.predicted_rate_inr).toLocaleString('en-IN')} |\n| Rate/km | ₹${rateData.rate_per_km} |\n| Model Confidence | ${(rateData.confidence * 100).toFixed(1)}% |\n\n*Prediction by RandomForest model trained on 15,000 freight samples (R²=0.977)*`,
+            type: 'ml_prediction',
+            suggestedActions: ['Optimize this route', 'Check carbon footprint', 'Compare vehicle types'],
+          };
+        }
+      } catch { /* fallback to pattern match */ }
+    }
+  }
+
+  if (mlIntent === 'sustainability') {
+    const cities = extractCities(message);
+    if (cities.origin && cities.destination) {
+      try {
+        const carbonRes = await fetch(`${ML_BASE}/predict/carbon`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ origin: cities.origin, destination: cities.destination }),
+        });
+        if (carbonRes.ok) {
+          const carbonData = await carbonRes.json();
+          mlEnrichment = {
+            message: `**🌱 ML Carbon Emission Estimate (GradientBoosting model)**\n\n| Parameter | Value |\n|-----------|-------|\n| Route | ${carbonData.origin} → ${carbonData.destination} |\n| Distance | ${carbonData.distance_km} km |\n| CO₂ Emission | ${carbonData.co2_kg} kg |\n| Per Ton-km | ${carbonData.co2_per_ton_km} g CO₂ |\n| Green Alternative | ${carbonData.green_alternative?.mode} |\n| Savings with Green | ${carbonData.green_alternative?.savings_pct}% less CO₂ |\n| Carbon Credit Value | ₹${carbonData.carbon_credit_inr} |\n\n*Prediction by GradientBoosting model calibrated with DEFRA emission factors (R²=0.988)*`,
+            type: 'ml_prediction',
+            suggestedActions: ['Switch to green route', 'ESG report', 'Calculate carbon credits'],
+          };
+        }
+      } catch { /* fallback */ }
+    }
+  }
+
+  // Step 3: Fall back to pattern matching for response content
   const match = findBestResponse(message);
-  const result = match ? match.response : FALLBACK;
+  const result = mlEnrichment || (match ? match.response : FALLBACK);
 
   // Build context-aware metadata
   const turnCount = Array.isArray(history) ? history.length : 0;
@@ -187,6 +248,44 @@ export async function POST(request) {
     conversationTurn: turnCount + 1,
     timestamp: new Date().toISOString(),
     agent: 'lorri-assistant-v3.0',
-    processingTime: `${complexity}ms`,
+    ml_intent: mlIntent,
+    ml_confidence: mlConfidence,
+    ml_powered: mlIntent !== null,
   });
+}
+
+// Extract Indian city names from user message
+function extractCities(message) {
+  const CITIES = [
+    'Mumbai', 'Delhi', 'Bangalore', 'Chennai', 'Kolkata', 'Hyderabad',
+    'Pune', 'Ahmedabad', 'Jaipur', 'Lucknow', 'Nagpur', 'Indore',
+    'Coimbatore', 'Vizag', 'Kochi', 'Chandigarh', 'Guwahati', 'Bhopal',
+    'Surat', 'Ludhiana',
+  ];
+  const ALIASES = {
+    'mum': 'Mumbai', 'bom': 'Mumbai', 'bombay': 'Mumbai',
+    'del': 'Delhi', 'new delhi': 'Delhi',
+    'blr': 'Bangalore', 'bengaluru': 'Bangalore',
+    'che': 'Chennai', 'madras': 'Chennai', 'maa': 'Chennai',
+    'kol': 'Kolkata', 'cal': 'Kolkata', 'calcutta': 'Kolkata',
+    'hyd': 'Hyderabad', 'pun': 'Pune', 'poona': 'Pune',
+    'ahm': 'Ahmedabad', 'jai': 'Jaipur', 'lko': 'Lucknow',
+    'nag': 'Nagpur', 'idr': 'Indore', 'cbe': 'Coimbatore',
+    'vtz': 'Vizag', 'visakhapatnam': 'Vizag',
+    'cok': 'Kochi', 'cochin': 'Kochi', 'ernakulam': 'Kochi',
+    'chd': 'Chandigarh', 'gau': 'Guwahati', 'bho': 'Bhopal',
+    'sur': 'Surat', 'ldh': 'Ludhiana',
+  };
+
+  const lower = message.toLowerCase();
+  const found = [];
+
+  for (const city of CITIES) {
+    if (lower.includes(city.toLowerCase())) found.push(city);
+  }
+  for (const [alias, city] of Object.entries(ALIASES)) {
+    if (lower.includes(alias) && !found.includes(city)) found.push(city);
+  }
+
+  return { origin: found[0] || null, destination: found[1] || null };
 }

@@ -1,0 +1,1 @@
+{"mae": 6836.91, "r2": 0.9768, "samples": 15000, "features": ["origin_lat", "origin_lon", "dest_lat", "dest_lon", "distance_km", "vehicle_type", "cargo_type", "weight_tons", "month", "diesel_price"]}

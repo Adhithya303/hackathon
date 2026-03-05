@@ -30,3 +30,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# ML model artifacts (large binary files — regenerate with `python ml/train.py`)
+ml/models/*.joblib
+ml/models/*.pkl
+__pycache__/
+*.pyc
